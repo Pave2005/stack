@@ -50,7 +50,7 @@ void HashProtection (stack* stk)
     unsigned long long hash_now = ReHash (stk);
     if (hash_now != hash_before)
     {
-        stk->status |= (1 << 0);
+        stk->status |= (1 << HASH_ERR);
     }
 }
 
@@ -64,7 +64,7 @@ void CanaryProtection (stack* stk)
 {
     if (stk->l_canary != 0xBADC && stk->r_canary != 0xBADC && stk->data[0] != 0xBADC && stk->data[stk->capacity + 1] != 0xBADC)
     {
-        stk->status |= (1 << 1);
+        stk->status |= (1 << CANARY_ERR);
     }
 }
 

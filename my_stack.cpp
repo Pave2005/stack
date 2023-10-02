@@ -7,15 +7,12 @@
 
 int main ()
 {
-    printf("OK!\n");
     stack stk = {};
-    StackCtor (&stk, -10);
-    printf("stk.status = %b\n", stk.status);
-
+    StackCtor (&stk, 5);
     StackPush (&stk, 20);
     Elem_t tmp = 0;
     StackPop (&stk, &tmp);
     StackDump (&stk);
-    printf ("\n%d", tmp);
+    printf ("%d", tmp);
     StackDtor (&stk);
 }
