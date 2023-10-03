@@ -3,8 +3,6 @@
 #include <assert.h>
 #include "stack_cd.h"
 
-//#define STACK_CTOR (stack) StackCtor ((stack), #stack, __LINE__, __FILE__, __fun__)
-
 int main ()
 {
     stack stk = {};

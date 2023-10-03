@@ -3,9 +3,6 @@
 #include "stack_cd.h"
 #include "stack_protect.h"
 
-// &stk
-// "&stk"
-
 void StackCtor_(stack* stk, size_t max_len, const char* var_name,
                 const char* file_name, int line_num, const char* func_name)
 {
@@ -30,8 +27,7 @@ void StackCtor_(stack* stk, size_t max_len, const char* var_name,
 
     *(Canary_t*)stk->data = stk->l_canary;
 
-    stk->data = (Elem_t*)((char*)stk->data + sizeof(Canary_t)); // перемеслил указатель начала мессива через канарейку
-
+    stk->data = (Elem_t*)((char*)stk->data + sizeof(Canary_t));
     *(Canary_t*)(stk->data + max_len * sizeof (Elem_t)) = stk->l_canary;
 
     stk->size = 0;
@@ -41,13 +37,12 @@ void StackCtor_(stack* stk, size_t max_len, const char* var_name,
     stk->file_name = file_name;
     stk->line_num = line_num;
     stk->func_name = func_name;
-    //stk->stack_name = #stack;
 }
 
 void StackDtor (stack* stk)
 {
-    //free (stk->data);
-    // POISON
+    stk->data = (Elem_t*)((char*)stk->data - sizeof (Canary_t));
+    free (stk->data);
     stk->capacity = POISON;
     stk->size = POISON;
     stk->r_canary = POISON;
