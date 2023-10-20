@@ -6,11 +6,16 @@
 int main ()
 {
     stack stk = {};
-    StackCtor (&stk, 5);
+    size_t ret = StackCtor (&stk, -2);
+    if (ret == OK)
+    {
     StackPush (&stk, 20);
+    StackPush (&stk, 2);
+    StackPush (&stk, 5);
     Elem_t tmp = 0;
     StackPop (&stk, &tmp);
     StackDump (&stk);
-    printf ("%d", tmp);
+    //printf ("%d", tmp);
     StackDtor (&stk);
+    }
 }

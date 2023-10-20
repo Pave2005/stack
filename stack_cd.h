@@ -14,6 +14,7 @@ enum ERRORS
     LEN_ERR = 2,
     DATA_ERR = 3,
     REDATA_ERR = 4,
+    OK = 5,
 };
 
 typedef unsigned long long Canary_t;
@@ -35,7 +36,7 @@ struct stack
     Canary_t r_canary;
 };
 
-void StackCtor_ (stack* stk, size_t capacity, const char* var_name,
+int StackCtor_ (stack* stk, int max_len, const char* var_name,
                  const char* file_name, int line_num, const char* func_name);
 void StackDtor (stack* stk);
 void StackRealloc (stack* stk);

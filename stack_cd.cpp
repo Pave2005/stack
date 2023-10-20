@@ -3,23 +3,28 @@
 #include "stack_cd.h"
 #include "stack_protect.h"
 
-void StackCtor_(stack* stk, size_t max_len, const char* var_name,
-                const char* file_name, int line_num, const char* func_name)
+int StackCtor_(stack* stk, int max_len, const char* var_name,
+               const char* file_name, int line_num, const char* func_name)
 {
+    stk->var_name = var_name;
+    stk->file_name = file_name;
+    stk->line_num = line_num;
+    stk->func_name = func_name;
+
     size_t canary_size = sizeof (Canary_t) / sizeof (Elem_t);
     stk->status = 0;
-
     if (max_len < 0)
     {
         stk->status |= (1 << LEN_ERR);
-        return;
+        StackDump (stk);
+        return LEN_ERR;
     }
 
     stk->data = (Elem_t*)calloc (max_len + 2 * canary_size, sizeof(Elem_t));
     if (stk->data == NULL)
     {
         stk->status |= (1 << DATA_ERR);
-        return;
+        return DATA_ERR;
     }
 
     stk->l_canary = 0xBADC;
@@ -33,10 +38,8 @@ void StackCtor_(stack* stk, size_t max_len, const char* var_name,
     stk->size = 0;
     stk->capacity = max_len;
     stk->stack_hash = Hash (stk);
-    stk->var_name = var_name;
-    stk->file_name = file_name;
-    stk->line_num = line_num;
-    stk->func_name = func_name;
+
+    return OK;
 }
 
 void StackDtor (stack* stk)
@@ -54,6 +57,7 @@ void StackDtor (stack* stk)
 void StackRealloc (stack* stk)
 {
     stk->capacity *= coeff;
+
     size_t re_size = stk->capacity * sizeof (Elem_t) + 2 * sizeof (Canary_t);
 
     stk->data = (Elem_t*)((char*)stk->data - sizeof (Canary_t));
@@ -62,7 +66,10 @@ void StackRealloc (stack* stk)
 
     *(Canary_t*)(stk->data + stk->capacity * sizeof (Elem_t)) = stk->l_canary;
     if (stk->data == NULL)
+    {
         stk->status |= (1 << REDATA_ERR);
+        return;
+    }
 }
 
 void StackPush (stack* stk, Elem_t value)
@@ -70,7 +77,9 @@ void StackPush (stack* stk, Elem_t value)
     HashProtection (stk);
     CanaryProtection (stk);
     if (stk->size >= stk->capacity)
+    {
         StackRealloc (stk);
+    }
     *(stk->data + stk->size++) = value;
     stk->stack_hash = ReHash (stk);
 }
@@ -90,14 +99,17 @@ void StackDump (stack* stk)
     printf ("Function - %s\n", stk->func_name);
     printf ("Stack name - %s\n", stk->var_name);
     printf ("Line - %d\n", stk->line_num);
-    printf ("%llu\n\n", stk->status);
-    printf ("size - %lu\n", stk->size);
-    printf ("capacity of stack - %lu\n\n", stk->capacity);
-    for (size_t i = 0; i < stk->capacity; i++)
+    printf ("Errors - %llu\n", stk->status);
+    if (stk->status == 0)
     {
-        if (*(stk->data + i) != 0)
-            printf ("*[%lu] = %d\n", i + 1, *(stk->data + i));
-        else
-            printf (" [%lu] = %d\n", i + 1, *(stk->data + i));
+        printf ("size - %lu\n", stk->size);
+        printf ("capacity of stack - %lu\n\n", stk->capacity);
+        for (size_t i = 0; i < stk->capacity; i++)
+        {
+            if (*(stk->data + i) != 0)
+                printf ("*[%lu] = %d\n", i + 1, *(stk->data + i));
+            else
+                printf (" [%lu] = %d\n", i + 1, *(stk->data + i));
+        }
     }
 }
